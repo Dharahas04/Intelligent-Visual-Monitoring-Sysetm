@@ -1,0 +1,6 @@
+numpy<1.27.0
+opencv-python==4.7.0.68
+scikit-image==0.19.2
+tensorflow-macos==2.10.0
+tensorflow-metal==0.6.0
+# ... any other packages

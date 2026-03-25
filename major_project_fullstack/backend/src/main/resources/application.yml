@@ -1,0 +1,43 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/major_monitoring?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  servlet:
+    multipart:
+      max-file-size: 1024MB
+      max-request-size: 1024MB
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      timeout: ${SPRING_DATA_REDIS_TIMEOUT:2000ms}
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:c3VwZXJfc2VjdXJlX2RldmVsb3BtZW50X2tleV9mb3JfbWFqb3JfcHJvamVjdF8yMDI2X19fIQ==}
+    expiration-minutes: ${APP_JWT_EXPIRATION_MINUTES:1440}
+  storage:
+    video-root: ${APP_VIDEO_STORAGE:../storage/videos}
+    result-root: ${APP_RESULT_STORAGE:../storage/results}
+  integrations:
+    workspace-root: ${APP_WORKSPACE_ROOT:/Users/saidharahasrao/Major}
+    python-bin: ${APP_PYTHON_BIN:python3}
+    job-timeout-seconds: ${APP_JOB_TIMEOUT_SECONDS:3600}
+  live:
+    redis-enabled: ${APP_LIVE_REDIS_ENABLED:true}
+    redis-queue-key: ${APP_LIVE_REDIS_QUEUE_KEY:intelmon:live:frames}
+    max-queue-depth: ${APP_LIVE_MAX_QUEUE_DEPTH:250}
+    min-frame-interval-ms: ${APP_LIVE_MIN_FRAME_INTERVAL_MS:300}
+    inference-timeout-seconds: ${APP_LIVE_INFERENCE_TIMEOUT_SECONDS:20}

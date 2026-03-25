@@ -1,0 +1,431 @@
+# # import cv2
+# # import numpy as np
+# # import joblib
+import smtplib
+from email.mime.text import MIMEText
+
+# # def preprocess_frame(frame):
+# #     resized_frame = cv2.resize(frame, (224, 224))
+# #     gray_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2GRAY)
+# #     normalized_frame = gray_frame / 255.0
+# #     return normalized_frame
+
+
+# # def extract_features(frames, target_feature_size):
+# #     features = []
+
+# #     # compute resizing side length dynamically
+# #     side = int(np.sqrt(target_feature_size))
+# #     if side * side != target_feature_size:
+# #         side = int(np.sqrt(target_feature_size + 1))
+
+# #     for i in range(len(frames) - 1):
+# #         flow = cv2.calcOpticalFlowFarneback(frames[i], frames[i + 1], None,
+# #                                             0.5, 3, 15, 3, 5, 1.2, 0)
+# #         mag, _ = cv2.cartToPolar(flow[..., 0], flow[..., 1])
+# #         mag_resized = cv2.resize(mag, (side, side))
+# #         flat = mag_resized.flatten()
+
+# #         # crop/pad to match exact model features
+# #         if len(flat) > target_feature_size:
+# #             flat = flat[:target_feature_size]
+# #         elif len(flat) < target_feature_size:
+# #             flat = np.pad(flat, (0, target_feature_size - len(flat)), 'constant')
+# #         features.append(flat)
+
+# #     return np.array(features)
+
+
+# # def further_processing(predictions):
+# #     threshold = 0.5
+# #     processed_predictions = predictions > threshold
+# #     return processed_predictions.astype(int)
+
+
+# # def main():
+# #     # Load model
+# #     mdt_model = joblib.load('model.pkl')
+# #     target_feature_size = getattr(mdt_model, 'n_features_in_', 476)
+# #     print(f"Model expects {target_feature_size} features per sample")
+
+# #     # Video path
+# #     video_path = '/Users/saidharahasrao/Downloads/Crowd-Anomaly-Detection-master/3.mp4'
+# #     cap = cv2.VideoCapture(video_path)
+# #     if not cap.isOpened():
+# #         print("Error: Cannot open video.")
+# #         return
+
+# #     frames = []
+# #     display_frames = []
+# #     while True:
+# #         ret, frame = cap.read()
+# #         if not ret:
+# #             break
+# #         frames.append(preprocess_frame(frame))
+# #         display_frames.append(cv2.resize(frame, (640, 480)))
+# #     cap.release()
+
+# #     print(f"Total frames extracted: {len(frames)}")
+
+# #     if len(frames) < 2:
+# #         print("Not enough frames for optical flow.")
+# #         return
+
+# #     # Extract and predict
+# #     features = extract_features(frames, target_feature_size)
+# #  # Use log-likelihood scores for anomaly detection
+# #     log_probs = mdt_model.score_samples(features)
+
+# # # Set adaptive threshold (lower score = more likely anomaly)
+# #     threshold = np.percentile(log_probs, 5)  # bottom 5% = anomalies
+            # send_email_alert()
+# #     processed_predictions = (log_probs < threshold).astype(int)
+
+# #     print(f"Anomaly threshold: {threshold}")
+# #     print(f"Detected anomalies: {np.sum(processed_predictions)} / {len(processed_predictions)}")
+
+
+# #     print("Processed Predictions:", processed_predictions.shape)
+
+# #     # Optional: save output video
+# #     out_path = "anomaly_output.mp4"
+# #     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+# #     out = cv2.VideoWriter(out_path, fourcc, 20.0, (640, 480))
+
+# #     # Display with anomaly highlights
+# #     for i in range(len(processed_predictions)):
+# #         frame = display_frames[i].copy()
+# #         if processed_predictions[i] == 1:
+# #             # Draw red border for anomaly
+# #             cv2.rectangle(frame, (0, 0), (639, 479), (0, 0, 255), 10)
+# #             cv2.putText(frame, "ANOMALY DETECTED!", (50, 50),
+# #                         cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 255), 3)
+# #         else:
+# #             cv2.rectangle(frame, (0, 0), (639, 479), (0, 255, 0), 3)
+# #             cv2.putText(frame, "Normal", (50, 50),
+# #                         cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 3)
+
+# #         cv2.imshow("Crowd Anomaly Detection", frame)
+# #         out.write(frame)
+
+# #         if cv2.waitKey(1) & 0xFF == ord('q'):
+# #             break
+
+# #     out.release()
+# #     cv2.destroyAllWindows()
+# #     print(f"✅ Visualization complete. Saved to: {out_path}")
+
+
+# # if __name__ == '__main__':
+# #     main()
+import cv2
+import numpy as np
+import joblib
+from playsound import playsound
+import smtplib
+from email.mime.text import MIMEText
+
+# def send_email_alert():
+    # Fill in your Gmail credentials and recipient
+    # Email notification functionality is disabled.
+    # To re-enable, uncomment the code below and fill in credentials.
+    # gmail_user = 'sdr302760@gmail.com'
+    # gmail_app_password = 'mzhlamegulecuqpn'
+    # to_email = 'dharahas04@gmail.com'
+    # subject = 'Crowd Anomaly Detected!'
+    # body = 'An anomaly was detected by your Anomaly Detector.'
+    # msg = MIMEText(body)
+    # msg['Subject'] = subject
+    # msg['From'] = gmail_user
+    # msg['To'] = to_email
+    # print('Attempting to send anomaly email alert...')
+    # try:
+    #     server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+    #     server.login(gmail_user, gmail_app_password)
+    #     server.sendmail(gmail_user, [to_email], msg.as_string())
+    #     server.quit()
+    #     print('Email alert sent successfully!')
+    # except Exception as e:
+    #     import traceback
+    #     print('Email send error:')
+    #     traceback.print_exc()
+
+def preprocess_frame(frame):
+    resized_frame = cv2.resize(frame, (224, 224))
+    gray_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2GRAY)
+    normalized_frame = gray_frame / 255.0
+    return normalized_frame
+    resized_frame = cv2.resize(frame, (224, 224))
+    gray_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2GRAY)
+    normalized_frame = gray_frame / 255.0
+    return normalized_frame
+
+
+def extract_features(frames, target_feature_size):
+    features = []
+
+    # compute resizing side length dynamically
+    side = int(np.sqrt(target_feature_size))
+    if side * side != target_feature_size:
+        side = int(np.sqrt(target_feature_size + 1))
+
+    for i in range(len(frames) - 1):
+        flow = cv2.calcOpticalFlowFarneback(frames[i], frames[i + 1], None,
+                                            0.5, 3, 15, 3, 5, 1.2, 0)
+        mag, _ = cv2.cartToPolar(flow[..., 0], flow[..., 1])
+        mag_resized = cv2.resize(mag, (side, side))
+        flat = mag_resized.flatten()
+
+        # crop/pad to match exact model features
+        if len(flat) > target_feature_size:
+            flat = flat[:target_feature_size]
+        elif len(flat) < target_feature_size:
+            flat = np.pad(flat, (0, target_feature_size - len(flat)), 'constant')
+        features.append(flat)
+
+    return np.array(features)
+
+
+def main():
+    # Load model
+    mdt_model = joblib.load('model.pkl')
+    target_feature_size = getattr(mdt_model, 'n_features_in_', 476)
+    print(f"Model expects {target_feature_size} features per sample")
+
+    # Video path
+    video_path = '/Users/saidharahasrao/Downloads/Crowd-Anomaly-Detection-master/1.mp4'
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        print("Error: Cannot open video.")
+        return
+
+    frames = []
+    display_frames = []
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        frames.append(preprocess_frame(frame))
+        display_frames.append(cv2.resize(frame, (640, 480)))
+    cap.release()
+
+    print(f"Total frames extracted: {len(frames)}")
+
+    if len(frames) < 2:
+        print("Not enough frames for optical flow.")
+        return
+
+    # Extract and predict
+    features = extract_features(frames, target_feature_size)
+    log_probs = mdt_model.score_samples(features)
+
+    # Adaptive threshold (bottom 10% = anomalies, more sensitive)
+    threshold = np.percentile(log_probs, 10)
+    print(f"Log-likelihood scores: {log_probs}")
+    print(f"Anomaly threshold (10th percentile): {threshold}")
+    processed_predictions = (log_probs < threshold).astype(int)
+    print(f"Detected anomalies: {np.sum(processed_predictions)} / {len(processed_predictions)}")
+
+    # Temporal smoothing: keep anomalies visible for 'linger_frames' frames
+    linger_frames = 10
+    smoothed_predictions = processed_predictions.copy()
+
+    for i in range(1, len(processed_predictions)):
+        if processed_predictions[i] == 1:
+            smoothed_predictions[i:i + linger_frames] = 1
+
+    # Save output video
+    out_path = "anomaly_output.mp4"
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    out = cv2.VideoWriter(out_path, fourcc, 20.0, (640, 480))
+
+    print("▶️ Starting visualization... Press 'q' to quit.")
+
+    # Alarm sound setup
+    alarm_path = '/Users/saidharahasrao/Downloads/Crowd-Anomaly-Detection-master/preview.mp3'  # Place preview.mp3 in the project directory
+    alarm_played = False
+
+    # Display with persistent anomaly highlights
+    prev_anomaly = 0
+    for i in range(len(smoothed_predictions)):
+        frame = display_frames[i].copy()
+
+        if smoothed_predictions[i] == 1:
+            # Draw bold red border for anomaly
+            cv2.rectangle(frame, (0, 0), (639, 479), (0, 0, 255), 8)
+            cv2.putText(frame, "ANOMALY DETECTED!", (50, 60),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 4)
+            # Play alarm sound only when anomaly status transitions from normal to anomaly
+            if prev_anomaly == 0:
+                print('Anomaly detected: triggering alarm notification.')
+                try:
+                    playsound(alarm_path, block=False)
+                except Exception as e:
+                    print(f"Alarm sound error: {e}")
+                # send_email_alert()  # Email notification is disabled
+        else:
+            # Subtle green border for normal
+            cv2.rectangle(frame, (0, 0), (639, 479), (0, 255, 0), 3)
+            cv2.putText(frame, "Normal", (50, 60),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 3)
+
+        prev_anomaly = smoothed_predictions[i]
+        out.write(frame)
+        cv2.imshow("Crowd Anomaly Detection", frame)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    out.release()
+    cv2.destroyAllWindows()
+    print(f"✅ Visualization complete. Saved to: {out_path}")
+
+
+if __name__ == '__main__':
+    main()
+# import cv2
+# import numpy as np
+# import joblib
+# import time
+
+# def preprocess_frame(frame):
+#     resized_frame = cv2.resize(frame, (224, 224))
+#     gray_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2GRAY)
+#     normalized_frame = gray_frame / 255.0
+#     return normalized_frame
+
+
+# def extract_features(frames, target_feature_size):
+#     features = []
+#     side = int(np.sqrt(target_feature_size))
+#     if side * side != target_feature_size:
+#         side = int(np.sqrt(target_feature_size + 1))
+
+#     for i in range(len(frames) - 1):
+#         flow = cv2.calcOpticalFlowFarneback(frames[i], frames[i + 1], None,
+#                                             0.5, 3, 15, 3, 5, 1.2, 0)
+#         mag, _ = cv2.cartToPolar(flow[..., 0], flow[..., 1])
+#         mag_resized = cv2.resize(mag, (side, side))
+#         flat = mag_resized.flatten()
+
+#         # match feature size
+#         if len(flat) > target_feature_size:
+#             flat = flat[:target_feature_size]
+#         elif len(flat) < target_feature_size:
+#             flat = np.pad(flat, (0, target_feature_size - len(flat)), 'constant')
+#         features.append(flat)
+
+#     return np.array(features)
+
+
+# def draw_status_overlay(frame, status_text, color, alpha=0.4):
+#     """Draw semi-transparent overlay and text"""
+#     overlay = frame.copy()
+#     cv2.rectangle(overlay, (0, 0), (639, 479), color, -1)
+#     return cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0)
+
+
+# def draw_progress_bar(frame, progress, color=(255, 255, 255)):
+#     bar_width = int(600 * progress)
+#     cv2.rectangle(frame, (20, 440), (20 + bar_width, 460), color, -1)
+#     cv2.rectangle(frame, (20, 440), (620, 460), (180, 180, 180), 2)
+#     return frame
+
+
+# def main():
+#     # Load model
+#     mdt_model = joblib.load('model.pkl')
+#     target_feature_size = getattr(mdt_model, 'n_features_in_', 476)
+#     print(f"Model expects {target_feature_size} features per sample")
+
+#     # Video path
+#     video_path = '/Users/saidharahasrao/Downloads/Crowd-Anomaly-Detection-master/4.mp4'
+#     cap = cv2.VideoCapture(video_path)
+#     if not cap.isOpened():
+#         print("Error: Cannot open video.")
+#         return
+
+#     frames, display_frames = [], []
+#     while True:
+#         ret, frame = cap.read()
+#         if not ret:
+#             break
+#         frames.append(preprocess_frame(frame))
+#         display_frames.append(cv2.resize(frame, (640, 480)))
+#     cap.release()
+
+#     print(f"Total frames extracted: {len(frames)}")
+
+#     if len(frames) < 2:
+#         print("Not enough frames for optical flow.")
+#         return
+
+#     # Feature extraction + prediction
+#     features = extract_features(frames, target_feature_size)
+#     log_probs = mdt_model.score_samples(features)
+
+#     threshold = np.percentile(log_probs, 5)
+#     processed_predictions = (log_probs < threshold).astype(int)
+#     print(f"Anomaly threshold: {threshold}")
+#     print(f"Detected anomalies: {np.sum(processed_predictions)} / {len(processed_predictions)}")
+
+#     # Smooth anomalies visually
+#     linger_frames = 10
+#     smoothed_predictions = processed_predictions.copy()
+#     for i in range(1, len(processed_predictions)):
+#         if processed_predictions[i] == 1:
+#             smoothed_predictions[i:i + linger_frames] = 1
+
+#     # Output setup
+#     out_path = "anomaly_output.mp4"
+#     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+#     out = cv2.VideoWriter(out_path, fourcc, 20.0, (640, 480))
+#     total_frames = len(smoothed_predictions)
+
+#     print("▶️ Starting cinematic visualization... Press 'q' to quit.")
+
+#     # Visualization
+#     for i, frame in enumerate(display_frames[:len(smoothed_predictions)]):
+#         frame = frame.copy()
+#         progress = (i + 1) / total_frames
+
+#         if smoothed_predictions[i] == 1:
+#             frame = draw_status_overlay(frame, "ANOMALY DETECTED", (0, 0, 255))
+#             cv2.putText(frame, "⚠️  ANOMALY DETECTED", (80, 100),
+#                         cv2.FONT_HERSHEY_DUPLEX, 1.2, (255, 255, 255), 3)
+#             cv2.rectangle(frame, (0, 0), (639, 479), (0, 0, 255), 6)
+#         else:
+#             frame = draw_status_overlay(frame, "NORMAL", (0, 255, 0))
+#             cv2.putText(frame, "Normal", (100, 100),
+#                         cv2.FONT_HERSHEY_DUPLEX, 1.2, (255, 255, 255), 3)
+#             cv2.rectangle(frame, (0, 0), (639, 479), (0, 255, 0), 4)
+
+#         # Progress bar
+#         draw_progress_bar(frame, progress)
+
+#         # Add subtle watermark
+#         cv2.putText(frame, "Crowd Anomaly Detector", (320, 470),
+#                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 1, cv2.LINE_AA)
+
+#         # Smooth fade for anomaly frames
+#         if smoothed_predictions[i] == 1:
+#             for fade in np.linspace(0.6, 1, 3):
+#                 faded = cv2.addWeighted(frame, fade, np.zeros_like(frame), 1 - fade, 0)
+#                 cv2.imshow("Crowd Anomaly Detection", faded)
+#                 out.write(faded)
+#                 if cv2.waitKey(5) & 0xFF == ord('q'):
+#                     break
+#         else:
+#             cv2.imshow("Crowd Anomaly Detection", frame)
+#             out.write(frame)
+
+#         if cv2.waitKey(1) & 0xFF == ord('q'):
+#             break
+
+#     out.release()
+#     cv2.destroyAllWindows()
+#     print(f"✅ Cinematic visualization complete. Saved to: {out_path}")
+
+
+# if __name__ == '__main__':
+#     main()

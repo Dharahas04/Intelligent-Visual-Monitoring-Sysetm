@@ -1,0 +1,18 @@
+# Virtual environment
+venv/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Large files (optional)
+*.mp4
+*.npy
+
+# System
+.DS_Store

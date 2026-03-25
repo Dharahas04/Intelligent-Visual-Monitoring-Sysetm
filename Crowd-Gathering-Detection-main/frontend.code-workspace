@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "../frontend"
+		},
+		{
+			"path": "../Crowd-Anomaly-Detection-master"
+		},
+		{
+			"path": "."
+		},
+		{
+			"path": "../Automatic-Number-Plate-Recognition-using-YOLOv5"
+		}
+	],
+	"settings": {}
+}
