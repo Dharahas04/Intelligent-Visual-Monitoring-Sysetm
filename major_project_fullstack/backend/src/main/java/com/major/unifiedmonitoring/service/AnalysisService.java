@@ -412,32 +412,25 @@ public class AnalysisService {
             }
             case CROWD_GATHERING -> {
                 Path serviceRoot = workspace.resolve("Crowd-Gathering-Detection-main");
-                String servicePython = resolvePythonWithImports(
+                Path anomalyRoot = workspace.resolve("Crowd-Anomaly-Detection-master");
+                Path maskRoot = workspace.resolve("intelligent_monitoring_system/ai_service");
+                Path anprRoot = workspace.resolve("Automatic-Number-Plate-Recognition-using-YOLOv5");
+                String connectorPython = resolvePythonWithImports(
                         List.of(
                                 serviceRoot.resolve("venv/bin/python3"),
-                                serviceRoot.resolve("venv/bin/python")
+                                serviceRoot.resolve("venv/bin/python"),
+                                anomalyRoot.resolve("venv/bin/python3"),
+                                anomalyRoot.resolve("venv/bin/python"),
+                                maskRoot.resolve(".venv/bin/python3"),
+                                maskRoot.resolve(".venv/bin/python"),
+                                anprRoot.resolve("venv/bin/python3"),
+                                anprRoot.resolve("venv/bin/python")
                         ),
-                        List.of("cv2", "numpy", "ultralytics")
+                        List.of("cv2", "numpy")
                 );
                 Path outputPath = resultsDirectory.resolve("crowd_gathering_job_" + job.getId() + ".mp4");
-                Path serviceScript = serviceRoot.resolve("crowd_gathering.py");
-                boolean canRunPrimary = Files.exists(serviceScript)
-                        && canImportModules(servicePython, List.of("cv2", "numpy", "ultralytics"));
-
-                if (canRunPrimary) {
-                    List<String> command = List.of(
-                            servicePython,
-                            "crowd_gathering.py",
-                            "--video",
-                            inputVideoPath,
-                            "--output",
-                            outputPath.toString()
-                    );
-                    yield new CommandDefinition(serviceRoot, command, outputPath.toString(), inputVideoPath);
-                }
 
                 Path connectorRoot = workspace.resolve("major_project_fullstack/connectors");
-                String connectorPython = resolvePythonWithImports(List.of(), List.of("cv2", "numpy"));
                 ensureExists(connectorRoot.resolve("run_crowd_gathering.py"), "Crowd gathering connector script not found.");
 
                 List<String> command = List.of(
@@ -452,35 +445,27 @@ public class AnalysisService {
             }
             case MASK_DETECTION -> {
                 Path serviceRoot = workspace.resolve("intelligent_monitoring_system/ai_service");
-                String servicePython = resolvePythonWithImports(
+                Path crowdRoot = workspace.resolve("Crowd-Gathering-Detection-main");
+                Path anomalyRoot = workspace.resolve("Crowd-Anomaly-Detection-master");
+                Path anprRoot = workspace.resolve("Automatic-Number-Plate-Recognition-using-YOLOv5");
+                String connectorPython = resolvePythonWithImports(
                         List.of(
                                 serviceRoot.resolve(".venv/bin/python3"),
                                 serviceRoot.resolve(".venv/bin/python"),
                                 serviceRoot.resolve("venv/bin/python3"),
-                                serviceRoot.resolve("venv/bin/python")
+                                serviceRoot.resolve("venv/bin/python"),
+                                crowdRoot.resolve("venv/bin/python3"),
+                                crowdRoot.resolve("venv/bin/python"),
+                                anomalyRoot.resolve("venv/bin/python3"),
+                                anomalyRoot.resolve("venv/bin/python"),
+                                anprRoot.resolve("venv/bin/python3"),
+                                anprRoot.resolve("venv/bin/python")
                         ),
-                        List.of("cv2", "numpy", "tensorflow")
+                        List.of("cv2", "numpy")
                 );
                 Path outputPath = resultsDirectory.resolve("mask_detection_job_" + job.getId() + ".mp4");
-                Path primaryScript = serviceRoot.resolve("mask_detector_final.py");
-                boolean canRunPrimary = Files.exists(primaryScript)
-                        && canImportModules(servicePython, List.of("cv2", "numpy", "tensorflow"));
-
-                if (canRunPrimary) {
-                    List<String> command = List.of(
-                            servicePython,
-                            "mask_detector_final.py",
-                            "--video",
-                            inputVideoPath,
-                            "--output",
-                            outputPath.toString(),
-                            "--no-display"
-                    );
-                    yield new CommandDefinition(serviceRoot, command, outputPath.toString(), inputVideoPath);
-                }
 
                 Path connectorRoot = workspace.resolve("major_project_fullstack/connectors");
-                String connectorPython = resolvePythonWithImports(List.of(), List.of("cv2", "numpy"));
                 ensureExists(connectorRoot.resolve("run_mask_detection.py"), "Mask detection connector script not found.");
 
                 List<String> command = List.of(

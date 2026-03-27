@@ -25,6 +25,22 @@ def create_writer(path: str, fps: float, width: int, height: int):
     raise RuntimeError(f"Unable to initialize output writer: {path}")
 
 
+def prepare_runtime_paths(output_dir: str) -> None:
+    runtime_root = os.path.join(output_dir, ".runtime")
+    cache_dir = os.path.join(runtime_root, "cache")
+    mpl_dir = os.path.join(runtime_root, "mpl")
+    os.makedirs(cache_dir, exist_ok=True)
+    os.makedirs(mpl_dir, exist_ok=True)
+
+    # Keep runtime caches inside project storage to avoid permission errors.
+    os.environ.setdefault("XDG_CACHE_HOME", cache_dir)
+    os.environ.setdefault("MPLCONFIGDIR", mpl_dir)
+
+    home_dir = os.path.expanduser("~")
+    if not os.access(home_dir, os.W_OK):
+        os.environ["HOME"] = runtime_root
+
+
 def estimate_mask_confidence(face_bgr: np.ndarray) -> tuple[str, float]:
     h, w = face_bgr.shape[:2]
     if h < 10 or w < 10:
@@ -57,6 +73,7 @@ def main():
 
     output_path = Path(args.output).resolve()
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    prepare_runtime_paths(str(output_path.parent))
 
     cap = cv2.VideoCapture(args.video)
     if not cap.isOpened():
@@ -133,6 +150,8 @@ def main():
             2,
         )
 
+        if frame.shape[1] != width or frame.shape[0] != height:
+            frame = cv2.resize(frame, (width, height))
         writer.write(frame)
         processed_frames += 1
 

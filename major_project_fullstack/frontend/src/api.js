@@ -17,7 +17,14 @@ async function request(path, { method = "GET", token, body, formData } = {}) {
 
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(payload.error || payload.details || "Request failed");
+    const isAuthFailure = response.status === 401 || response.status === 403;
+    const message = isAuthFailure
+      ? "Session expired. Please login again."
+      : payload.error || payload.details || "Request failed";
+    const error = new Error(message);
+    error.status = response.status;
+    error.payload = payload;
+    throw error;
   }
   return payload;
 }

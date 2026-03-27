@@ -114,6 +114,7 @@ function Dashboard({ token, profile, onLogout }) {
   const liveRecorderRef = useRef(null);
   const liveRecorderChunksRef = useRef([]);
   const liveStreamingRef = useRef(false);
+  const liveServiceRef = useRef("ANPR");
   const liveFileUrlRef = useRef("");
   const liveAlertCooldownRef = useRef(0);
 
@@ -237,13 +238,17 @@ function Dashboard({ token, profile, onLogout }) {
     }
     liveAlertCooldownRef.current = now;
 
-    const service = payload?.serviceType || liveService;
+    const service = payload?.serviceType || liveServiceRef.current;
     const message = payload?.error || payload?.message || "Live alert detected";
     const severity = payload?.status === "FAILED" ? "error" : "warning";
     appendLiveEvent(severity, `[${service}] ${message}`);
     maybeBrowserNotify("IntelMon Live Alert", `${service}: ${message}`);
     loadLiveStatus(true);
   };
+
+  useEffect(() => {
+    liveServiceRef.current = liveService;
+  }, [liveService]);
 
   const loadDashboardData = async (showErrors = true) => {
     try {
@@ -281,6 +286,10 @@ function Dashboard({ token, profile, onLogout }) {
         setError("");
       }
     } catch (err) {
+      if (err?.status === 401 || err?.status === 403) {
+        onLogout();
+        return;
+      }
       if (showErrors) {
         setError(err.message);
       }
@@ -462,7 +471,10 @@ function Dashboard({ token, profile, onLogout }) {
         try {
           const payload = JSON.parse(event.data);
           if (payload.type === "result") {
-            setLiveStats(payload);
+            setLiveStats({
+              ...payload,
+              serviceType: payload?.serviceType || liveServiceRef.current
+            });
             if (Number.isFinite(payload.queueDepth)) {
               setLiveQueueDepth(payload.queueDepth);
             }
@@ -614,7 +626,7 @@ function Dashboard({ token, profile, onLogout }) {
       ws.send(
         JSON.stringify({
           type: "frame",
-          serviceType: liveService,
+          serviceType: liveServiceRef.current,
           frameData,
           clientTs: Date.now()
         })
@@ -651,7 +663,7 @@ function Dashboard({ token, profile, onLogout }) {
     setLiveStreaming(true);
     setLiveFramesSent(0);
     setLiveFramesDropped(0);
-    appendLiveEvent("info", `Live analysis started for ${liveService}.`);
+    appendLiveEvent("info", `Live analysis started for ${liveServiceRef.current}.`);
   };
 
   const startLiveRecording = async () => {
@@ -994,6 +1006,7 @@ function Dashboard({ token, profile, onLogout }) {
   );
 
   const renderLivePage = () => {
+    const activeInferenceService = liveStats?.serviceType || liveService;
     const frameWidth = Number(liveStats?.frameWidth) > 0 ? Number(liveStats?.frameWidth) : 640;
     const frameHeight = Number(liveStats?.frameHeight) > 0 ? Number(liveStats?.frameHeight) : 360;
     const liveBoxes = Array.isArray(liveStats?.boxes) ? liveStats.boxes : [];
@@ -1004,7 +1017,7 @@ function Dashboard({ token, profile, onLogout }) {
     const liveAlertText =
       liveStats?.error ||
       liveStats?.message ||
-      (liveService === "MASK_DETECTION" ? "No-mask alert detected" : "Live alert detected");
+      (activeInferenceService === "MASK_DETECTION" ? "No-mask alert detected" : "Live alert detected");
 
     return (
       <section className="page-grid two-col">
@@ -1043,7 +1056,8 @@ function Dashboard({ token, profile, onLogout }) {
             </div>
             {liveHasAlert ? <div className="live-alert-banner">ALERT: {liveAlertText}</div> : null}
             <div className="live-overlay">
-              <p>Service: {liveService}</p>
+              <p>Selected: {liveService}</p>
+              <p>Backend: {activeInferenceService}</p>
               <p>Status: {liveStats?.status || (liveStreaming ? "RUNNING" : "IDLE")}</p>
               <p>Detections: {formatMetricValue(liveStats?.detections)}</p>
               <p>No Mask: {formatMetricValue(liveStats?.noMaskDetections)}</p>
@@ -1114,7 +1128,16 @@ function Dashboard({ token, profile, onLogout }) {
 
           <label>
             Service
-            <select value={liveService} onChange={(event) => setLiveService(event.target.value)}>
+            <select
+              value={liveService}
+              onChange={(event) => {
+                const nextService = event.target.value;
+                setLiveService(nextService);
+                liveServiceRef.current = nextService;
+                setLiveStats(null);
+                appendLiveEvent("info", `Live service switched to ${nextService}.`);
+              }}
+            >
               <option value="ANPR">ANPR</option>
               <option value="MASK_DETECTION">Mask Detection</option>
               <option value="CROWD_GATHERING">Crowd Detection</option>
